@@ -1,0 +1,190 @@
+<html>
+<head>
+  <title>Monthly Calendar</title>
+  <style>
+    body {
+      font-family: "Lucida Console", "Courier New", monospace;
+      text-align: center;
+      justify-content: center;
+    }
+
+    .page {
+      margin: 1em;
+    }
+
+    .days {
+      padding: 0.2em;
+      text-align: left;
+      border-style: solid;
+      border-width: 0.1em;
+      border-color: Black;
+      box-sizing: border-box;
+      width: 3em;
+      height: 2em;
+    }
+
+    .dayGrid {
+      display: grid;
+      grid-template-columns: auto auto auto auto auto auto auto;
+      border-style: solid;
+      border-width: 0.1em;
+      border-color: Black;
+      padding: none;
+      width: 21em;
+      margin: auto;
+    }
+
+    .dayhead {
+      padding: 0.2em;
+      text-align: center;
+      color: White;
+      border-style: solid;
+      border-width: 0.1em;
+      border-color: Black;
+      box-sizing: border-box;
+      width: 3em;
+      height: 1.5em;
+      background-color: Gray;
+    }
+  </style>
+</head>
+<body>
+  <div class="page" id="page">
+    <button id="prevMonth"><-</button><text id="month">Month</text><button id="nextMonth">-></button>
+    <span style="display: inline-block; width: 3em;"></span>
+    <button id="prevYear"><-</button><text id="year">Year</text><button id="nextYear">-></button>
+    <br><br>
+    <div class="dayGrid">
+      <div class="dayhead">Sun</div>
+      <div class="dayhead">Mon</div>
+      <div class="dayhead">Tue</div>
+      <div class="dayhead">Wed</div>
+      <div class="dayhead">Thu</div>
+      <div class="dayhead">Fri</div>
+      <div class="dayhead">Sat</div>
+      <div class="days" id="d0"></div>
+      <div class="days" id="d1"></div>
+      <div class="days" id="d2"></div>
+      <div class="days" id="d3"></div>
+      <div class="days" id="d4"></div>
+      <div class="days" id="d5"></div>
+      <div class="days" id="d6"></div>
+      <div class="days" id="d7"></div>
+      <div class="days" id="d8"></div>
+      <div class="days" id="d9"></div>
+      <div class="days" id="d10"></div>
+      <div class="days" id="d11"></div>
+      <div class="days" id="d12"></div>
+      <div class="days" id="d13"></div>
+      <div class="days" id="d14"></div>
+      <div class="days" id="d15"></div>
+      <div class="days" id="d16"></div>
+      <div class="days" id="d17"></div>
+      <div class="days" id="d18"></div>
+      <div class="days" id="d19"></div>
+      <div class="days" id="d20"></div>
+      <div class="days" id="d21"></div>
+      <div class="days" id="d22"></div>
+      <div class="days" id="d23"></div>
+      <div class="days" id="d24"></div>
+      <div class="days" id="d25"></div>
+      <div class="days" id="d26"></div>
+      <div class="days" id="d27"></div>
+      <div class="days" id="d28"></div>
+      <div class="days" id="d29"></div>
+      <div class="days" id="d30"></div>
+      <div class="days" id="d31"></div>
+      <div class="days" id="d32"></div>
+      <div class="days" id="d33"></div>
+      <div class="days" id="d34"></div>
+      <div class="days" id="d35"></div>
+      <div class="days" id="d36"></div>
+      <div class="days" id="d37"></div>
+      <div class="days" id="d38"></div>
+      <div class="days" id="d39"></div>
+      <div class="days" id="d40"></div>
+      <div class="days" id="d41"></div>
+    </div>
+    
+  </div>
+
+  <script>
+    const pageElement = document.getElementById('page');
+
+    const monthElement = document.getElementById('month');
+    const nextMonthElement = document.getElementById('nextMonth');
+    const prevMonthElement = document.getElementById('prevMonth');
+
+    const yearElement = document.getElementById('year');
+    const nextYearElement = document.getElementById('nextYear');
+    const prevYearElement = document.getElementById('prevYear');
+    
+    function drawMonth(month, year) {
+      monthElement.textContent = " " + ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][month] + " ";
+      yearElement.textContent = " " + year + " ";
+
+      const prevMonthLastDay = new Date(year,month, 0).getDate()
+      const dayOfWeekMonthStarts = new Date(year + '/' + (month+1) + '/1').getDay();
+      const lastDayOfMonth = new Date(year,month+1, 0).getDate();
+
+      let startOnDay = dayOfWeekMonthStarts + (dayOfWeekMonthStarts == 0 ? 7 : 0);
+
+      for (let i = 0; i < 42; i++) {
+        var dayElement = document.getElementById('d'+i);
+        dayElement.style.backgroundColor = 'White';
+        dayElement.textContent = i - startOnDay + 1;
+
+        if (i < startOnDay) {
+          dayElement.style.backgroundColor = 'LightGray';
+          dayElement.textContent = i - startOnDay + 1 + prevMonthLastDay;
+        }
+        if (i >= startOnDay + lastDayOfMonth) {
+          dayElement.style.backgroundColor = 'LightGray';
+          dayElement.textContent = i - startOnDay + 1 - lastDayOfMonth;
+        }
+      }
+    }
+    
+    function nextMonth() {
+      if (month == 11) {
+        month = 0;
+        year = year + 1;
+      } else {
+        month = month + 1;
+      }
+      drawMonth(month, year);
+    }
+
+    function prevMonth() {
+      if (month == 0) {
+        month = 11;
+        year = year - 1;
+      } else {
+        month = month - 1;
+      }
+      drawMonth(month, year);
+    }
+    
+    function nextYear() {
+      year = year + 1;
+      drawMonth(month, year);
+    }
+
+    function prevYear() {
+      year = year - 1;
+      drawMonth(month, year);
+    }
+
+    nextMonthElement.addEventListener('click', nextMonth);
+    prevMonthElement.addEventListener('click', prevMonth);
+
+    nextYearElement.addEventListener('click', nextYear);
+    prevYearElement.addEventListener('click', prevYear);
+
+    const now = new Date();
+    var month = now.getMonth();
+    var year = now.getFullYear();
+    drawMonth(month, year);
+  </script>
+</body>
+</html>
