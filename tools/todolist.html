@@ -1,0 +1,190 @@
+<html><head><title>To-Do List</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    ul {
+      list-style-type: none;
+      padding: 0;
+    }
+    li {
+      //display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    li.completed {
+      text-decoration: line-through;
+      color: gray;
+    }
+    button {
+      margin-left: 10px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 3px;
+      cursor: pointer;
+      padding: 5px;
+    }
+    button:hover {
+      background-color: darkred;
+    }
+    #importExportButtons {
+      margin-top: 20px;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+  <body>
+    <div id="header">This tool uses localStorage (HTML5 Storage) to save data in your browser. This is cleared when cookies are cleared, and is tied to the URL of this tool. Use the [import] and [export] features to save your data when clearing browser cache, moving the offline version of this tool to a different location, or when transitioning between versions of this tool.
+    <button id="hideheader" onclick="function hide(){document.getElementById('header').style.display = 'none';};hide()">Hide</button><hr>
+    </div>
+    <h1>To-Do List</h1>
+    <div id="importExportButtons">
+      <button id="exportButton">Export</button>
+      <button id="importButton">Import</button>
+      <input type="file" id="importFile" style="display: none;">
+    </div>
+    <input type="text" id="taskInput" placeholder="Enter a task">
+    <button id="addTaskButton">Add Task</button>
+    <ul id="taskList"></ul>
+  </body>
+  <script>
+    function storageAvailable(type) {
+      let storage;
+      try {
+        storage = window[type];
+        const x = "__storage_test__";
+        storage.setItem(x, x);
+        storage.removeItem(x);
+        return true;
+      } catch (e) {
+        return (
+          e instanceof DOMException &&
+          e.name === "QuotaExceededError" &&
+          // acknowledge QuotaExceededError only if there's something already stored
+          storage &&
+          storage.length !== 0
+        );
+      }
+    }
+
+    if (storageAvailable("localStorage")) {
+      //continue as normal
+    } else {
+      alert("localStorage is not currently available. Use [import] and [export] to save data.");
+    }
+
+    const taskInput = document.getElementById('taskInput');
+    const addTaskButton = document.getElementById('addTaskButton');
+    const taskList = document.getElementById('taskList');
+    const exportButton = document.getElementById('exportButton');
+    const importButton = document.getElementById('importButton');
+    const importFile = document.getElementById('importFile');
+
+    // Load tasks from localStorage
+    function loadTasks() {
+      const savedTasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      savedTasks.forEach(task => {
+        addTaskToDOM(task.text, task.completed);
+      });
+    }
+
+    // Save tasks to localStorage
+    function saveTasks() {
+      const tasks = [];
+      taskList.querySelectorAll('li').forEach(listItem => {
+        const checkbox = listItem.querySelector('input[type="checkbox"]');
+        const taskText = listItem.querySelector('span').textContent;
+        tasks.push({ text: taskText, completed: checkbox.checked });
+      });
+      localStorage.setItem('tasks', JSON.stringify(tasks));
+    }
+
+    // Add task to DOM
+    function addTaskToDOM(taskText, completed = false) {
+      const listItem = document.createElement('li');
+
+      // Create checkbox
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = completed;
+      checkbox.addEventListener('change', () => {
+        listItem.classList.toggle('completed', checkbox.checked);
+        saveTasks();
+      });
+
+      // Create task text
+      const taskSpan = document.createElement('span');
+      taskSpan.textContent = taskText;
+
+      // Create delete button
+      const deleteButton = document.createElement('button');
+      deleteButton.textContent = 'X';
+      deleteButton.addEventListener('click', () => {
+        taskList.removeChild(listItem);
+        saveTasks();
+      });
+
+      // Append elements to list item
+      listItem.appendChild(checkbox);
+      listItem.appendChild(taskSpan);
+      listItem.appendChild(deleteButton);
+
+      // Add completed class if task is marked as completed
+      if (completed) {
+        listItem.classList.add('completed');
+      }
+
+      // Add list item to task list
+      taskList.appendChild(listItem);
+    }
+
+    // Add task button click event
+    addTaskButton.addEventListener('click', () => {
+      const taskText = taskInput.value.trim();
+      if (taskText) {
+        addTaskToDOM(taskText);
+        saveTasks();
+        taskInput.value = '';
+      }
+    });
+
+    // Export tasks to a JSON file
+    exportButton.addEventListener('click', () => {
+      const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+      const blob = new Blob([JSON.stringify(tasks, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'tasks.json';
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Import tasks from a JSON file
+    importButton.addEventListener('click', () => {
+      importFile.click();
+    });
+
+    importFile.addEventListener('change', (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const importedTasks = JSON.parse(e.target.result);
+          taskList.innerHTML = ''; // Clear current tasks
+          importedTasks.forEach(task => {
+            addTaskToDOM(task.text, task.completed);
+          });
+          saveTasks();
+        };
+        reader.readAsText(file);
+      }
+    });
+
+    // Load tasks on page load
+    loadTasks();
+  </script>
+</html>
